@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package health;
+
+option go_package = "/generated/go/health";
+
+
+service HealthService{
+    rpc Check(HealthCheckRequest) returns (HealthCheckResponse){}
+}
+message HealthCheckRequest {
+    string name = 1;
+}
+  
+message HealthCheckResponse {
+    string message = 1;
+}
+
+
