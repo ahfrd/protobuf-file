@@ -40,7 +40,7 @@ jobs:
 
     - name: Generate Go, gRPC, Gateway, Descriptor files
       run: |
-        PROTO_ROOT=protobuf/go
+        PROTO_ROOT=protobuf
         OUT_ROOT=generated/go
         GOOGLEAPIS_DIR=/tmp/googleapis
 
