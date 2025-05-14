@@ -71,6 +71,9 @@ jobs:
               "$file"
           done
         done
+    - name: Update depedency go modules
+      run: |
+        go mod tidy
     - name: Commit generated files
       run: |
         if find generated/go -type f | grep -q .; then
@@ -82,3 +85,4 @@ jobs:
         else
           echo "⚠️ No generated files found — skipping commit."
         fi
+        
