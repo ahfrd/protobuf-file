@@ -1,0 +1,84 @@
+name: Generate Go Protobuf Files
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  generate-go-proto:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Install protoc
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y protobuf-compiler
+
+    - name: Install protoc plugins
+      run: |
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+        go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.17.0
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+    - name: Download googleapis (for annotations.proto)
+      run: |
+        git clone --depth=1 https://github.com/googleapis/googleapis.git /tmp/googleapis
+
+    - name: Generate Go, gRPC, Gateway, Descriptor files
+      run: |
+        PROTO_ROOT=protobuf/go
+        OUT_ROOT=generated/go
+        GOOGLEAPIS_DIR=/tmp/googleapis
+
+        mkdir -p $OUT_ROOT
+
+        dirs=$(find $PROTO_ROOT -type d -mindepth 1)
+        if [ -z "$dirs" ]; then
+          echo "⚠️ No proto subdirectories found in $PROTO_ROOT"
+          exit 1
+        fi
+        for dir in $dirs; do
+          pkg=$(basename "$dir")
+          descriptor=$OUT_ROOT/$pkg/descriptor
+          mkdir -p $OUT_ROOT/$pkg
+          mkdir -p $descriptor
+          
+          for file in "$dir"/*.proto; do
+            base=$(basename "$file" .proto)
+
+            protoc \
+              --proto_path=$PROTO_ROOT \
+              --proto_path=$GOOGLEAPIS_DIR \
+              --go_out=generated/go --go_opt=paths=source_relative \
+              --go-grpc_out=generated/go --go-grpc_opt=paths=source_relative \
+              --grpc-gateway_out=generated/go --grpc-gateway_opt=paths=source_relative \
+              --descriptor_set_out=$OUT_ROOT/$pkg/descriptor/${base}.pb \
+              --include_imports \
+              "$file"
+          done
+        done
+    - name: Commit generated files
+      run: |
+        if find generated/go -type f | grep -q .; then
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add -f generated/go/
+          git commit -m "Auto-generate protobuf and descriptor files [CI]" || echo "ℹ️ No changes to commit"
+          git push origin main
+        else
+          echo "⚠️ No generated files found — skipping commit."
+        fi

@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+package loyalty;
+
+option go_package = "/generated/go/loyalty";
+import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
+
+
+service LoyaltyService{
+    rpc GetListGiftsProduct(GetListGiftsProductRequest) returns (GetListGiftsResponse){}
+    rpc GetListGiftsProductStruct(GetGiftsProductDetailRequest) returns (GetListGiftsStructResponse){}
+    rpc GetListGiftsProductValue(GetGiftsProductDetailRequest) returns (GetListGiftsValueResponse){}
+
+    rpc GetGiftsDetail(GetGiftsProductDetailRequest) returns (GetListGiftsDetailResponse){
+        option (google.api.http) = {
+          get: "/v1/detail/{product_id}"
+        };
+    }
+    rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse){}
+    rpc StreamClientProduct(stream ProductDetailEntity) returns (GetListGiftsDetailResponse){}
+    rpc StreamServerProduct(ProductDetailEntity) returns (stream GetListGiftsDetailResponse){}
+    rpc BiderectionalStreamProduct(stream ProductDetailEntity) returns (stream GetListGiftsDetailResponse){}
+    rpc SayHello (HelloRequest) returns (HelloReply) {
+        option (google.api.http) = {
+          post: "/v1/hello"
+          body: "*"
+        };
+    }
+    rpc SayHellox (HelloRequest) returns (HelloReply) {
+        option (google.api.http) = {
+          post: "/v1/hellox"
+          body: "*"
+        };
+    }
+    
+}
+message HelloRequest {
+    string name = 1;
+  }
+  
+  message HelloReply {
+    string message = 1;
+  }
+
+message CreateProductRequest{
+    string product_name =2;
+    string product_type=3;
+    string product_detail=4;
+    int64 points_product=5;
+    int64 product_stock=6;
+    string image_url =7;
+}
+
+message GetListGiftsResponse {
+    int32 code =1;
+    string status =2;
+    string message=3;
+    repeated GetListGiftsProductData data = 4;
+}
+
+message GetListGiftsDetailResponse {
+    int32 code =1;
+    string status =2;
+    string message=3;
+    GetListGiftsProductData data = 4;
+}
+
+message GetListGiftsStructResponse {
+    int32 code =1;
+    string status =2;
+    string message=3;
+    google.protobuf.Struct data = 4;
+}
+message GetListGiftsValueResponse {
+    int32 code =1;
+    string status =2;
+    string message=3;
+    google.protobuf.Any data = 4;
+}
+
+message CreateProductResponse {
+    int32 code =1;
+    string status =2;
+    string message=3;
+    google.protobuf.Empty data =4;
+}
+
+message ProductDetailEntity {
+    int32 product_id = 1;
+    string product_name =2;
+    string product_type=3;
+    string product_detail=4;
+    int64 points_product=5;
+    int64 product_stock=6;
+    string image_url =7;
+    string created_at=8;
+    string updated_at=9;
+    string product_brand=10;
+}
+
+
+message GetListGiftsProductRequest {
+    PagingRequest paging = 1;
+    SortingRequest sort = 2;
+    string product_name = 3;
+    string product_type = 4;
+}
+
+message GetGiftsProductDetailRequest {
+    string product_id = 1;
+}
+
+message PagingRequest {
+    string page_number= 1;
+    string page_size=2;
+}
+
+message SortingRequest {
+    string key = 1;
+    string value = 2;
+}
+
+ message GetListGiftsProductData {
+     string product_id = 1;
+     string product_name =2;
+     string product_type=3;
+     float ratings =4;
+     int64 points = 5;
+     int32 stock = 6;
+     string image_url=7;
+     string star=8;
+ }
+
+
