@@ -62,7 +62,7 @@ jobs:
                 base=$(basename "$gen_file" | cut -d. -f1)
                 if [ ! -f "$proto_src_dir/$base.proto" ]; then
                         echo "🗑 Removing stale generated file: $gen_file"
-                        rm -f "$gen_file"
+                        rm -rf "$gen_file"
                 fi
           done
 
@@ -72,7 +72,7 @@ jobs:
                         base=$(basename "$pb_file" .pb)
                         if [ ! -f "$proto_src_dir/$base.proto" ]; then
                                 echo "🗑 Removing stale descriptor file: $pb_file"
-                                rm -f "$pb_file"
+                                rm -rf "$pb_file"
                         fi
                 done
           fi
