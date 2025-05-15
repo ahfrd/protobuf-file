@@ -37,6 +37,9 @@ jobs:
     - name: Download googleapis (for annotations.proto)
       run: |
         git clone --depth=1 https://github.com/googleapis/googleapis.git /tmp/googleapis
+    - name: Fix ownership
+      run: sudo chown -R $(id -u):$(id -g) generated/go/
+
     - name: Generate Go, gRPC, Gateway, Descriptor files
       run: |
         PROTO_ROOT=protobuf
