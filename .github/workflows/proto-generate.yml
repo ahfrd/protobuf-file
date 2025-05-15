@@ -61,6 +61,7 @@ jobs:
           for gen_file in "$pkg_dir"/*; do
                     base=$(basename "$gen_file" | cut -d. -f1)
                     if [ ! -f "$proto_src_dir/$base.proto" ]; then
+                    echo "proto_src_dir/$base.proto"
                               echo "🗑 Removing stale generated file: $gen_file"
                               sudo rm -rf "$gen_file"
                     fi
