@@ -50,26 +50,6 @@ jobs:
 
         mkdir -p $OUT_ROOT
 
-        for pkg_dir in generated/go/*; do
-          # Skip non-directories
-          [ -d "$pkg_dir" ] || continue
-
-          pkg=$(basename "$pkg_dir")
-          proto_src_dir="protobuf/$pkg"
-
-          # Clean up stale .pb descriptor files
-          descriptor_dir="$pkg_dir/descriptor"
-          if [ -d "$descriptor_dir" ]; then
-                    for pb_file in "$descriptor_dir"/*.pb; do
-                              base=$(basename "$pb_file" .pb)
-                              if [ ! -f "$proto_src_dir/$base.proto" ]; then
-                                        echo "🗑 Removing stale descriptor file: $pb_file"
-                                        sudo chmod u+w "$pb_file" || true
-                                        sudo rm -f "$pb_file"
-                              fi
-                    done
-          fi
-        done
         dirs=$(find $PROTO_ROOT -type d -mindepth 1)
         if [ -z "$dirs" ]; then
           echo "⚠️ No proto subdirectories found in $PROTO_ROOT"
