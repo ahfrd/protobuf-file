@@ -37,7 +37,46 @@ jobs:
     - name: Download googleapis (for annotations.proto)
       run: |
         git clone --depth=1 https://github.com/googleapis/googleapis.git /tmp/googleapis
+    - name: Cleanup file
+      run: |
+        PROTO_ROOT=protobuf
+        OUT_ROOT=generated/go
+        GOOGLEAPIS_DIR=/tmp/googleapis
 
+        mkdir -p "$OUT_ROOT"
+
+        # Step 1: Cleanup stale files
+        for pkg_dir in "$OUT_ROOT"/*; do
+          [ -d "$pkg_dir" ] || continue
+
+          proto_pkg=$(basename "$pkg_dir")
+          proto_src_dir="$PROTO_ROOT/$proto_pkg"
+
+          if [ ! -d "$proto_src_dir" ]; then
+                echo "🗑 Removing stale package directory: $pkg_dir"
+                rm -rf "$pkg_dir"
+                continue
+          fi
+
+          for gen_file in "$pkg_dir"/*; do
+                base=$(basename "$gen_file" | cut -d. -f1)
+                if [ ! -f "$proto_src_dir/$base.proto" ]; then
+                        echo "🗑 Removing stale generated file: $gen_file"
+                        rm -f "$gen_file"
+                fi
+          done
+
+          descriptor_dir="$pkg_dir/descriptor"
+          if [ -d "$descriptor_dir" ]; then
+                for pb_file in "$descriptor_dir"/*.pb; do
+                        base=$(basename "$pb_file" .pb)
+                        if [ ! -f "$proto_src_dir/$base.proto" ]; then
+                                echo "🗑 Removing stale descriptor file: $pb_file"
+                                rm -f "$pb_file"
+                        fi
+                done
+          fi
+        done
     - name: Generate Go, gRPC, Gateway, Descriptor files
       run: |
         PROTO_ROOT=protobuf
