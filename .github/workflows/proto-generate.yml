@@ -45,26 +45,39 @@ jobs:
 
         mkdir -p $OUT_ROOT
 
-        for descriptor_dir in "$OUT_ROOT"/*/descriptor; do
-          [ -d "$descriptor_dir" ] || continue
-          pkg=$(basename "$(dirname "$descriptor_dir")")
-          if [ ! -d "$PROTO_ROOT/$pkg" ]; then
-                    echo "🧹 Removing generated files for deleted package: $pkg"
-                    rm -rf "$(dirname "$descriptor_dir")"
+        # Step 1: Cleanup stale files
+        for pkg_dir in "$OUT_ROOT"/*; do
+          [ -d "$pkg_dir" ] || continue
+
+          proto_pkg=$(basename "$pkg_dir")
+          proto_src_dir="$PROTO_ROOT/$proto_pkg"
+
+          if [ ! -d "$proto_src_dir" ]; then
+                    echo "🗑 Removing stale package directory: $pkg_dir"
+                    rm -rf "$pkg_dir"
+                    continue
           fi
-        done
+
+          for gen_file in "$pkg_dir"/*; do
+                    base=$(basename "$gen_file" | cut -d. -f1)
+                    if [ ! -f "$proto_src_dir/$base.proto" ]; then
+                              echo "🗑 Removing stale generated file: $gen_file"
+                              rm -f "$gen_file"
+                    fi
+          done
 
           descriptor_dir="$pkg_dir/descriptor"
-            if [ -d "$descriptor_dir" ]; then
-              for pb_file in "$descriptor_dir"/*.pb; do
-                base=$(basename "$pb_file" .pb)
-                if [ ! -f "$proto_src_dir/$base.proto" ]; then
-                  echo "🗑 Removing stale descriptor: $pb_file"
-                  rm -f "$pb_file"
-                fi
-              done
-            fi
-
+          if [ -d "$descriptor_dir" ]; then
+                    for pb_file in "$descriptor_dir"/*.pb; do
+                              base=$(basename "$pb_file" .pb)
+                              if [ ! -f "$proto_src_dir/$base.proto" ]; then
+                                        echo "🗑 Removing stale descriptor file: $pb_file"
+                                        rm -f "$pb_file"
+                              fi
+                    done
+          fi
+        done
+        
         dirs=$(find $PROTO_ROOT -type d -mindepth 1)
         if [ -z "$dirs" ]; then
           echo "⚠️ No proto subdirectories found in $PROTO_ROOT"
