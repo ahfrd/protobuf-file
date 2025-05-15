@@ -54,7 +54,8 @@ jobs:
 
           proto_pkg=$(basename "$pkg_dir")
           proto_src_dir="$PROTO_ROOT/$proto_pkg"
-
+          echo $proto_src_dir
+          echo "#######"
           if [ ! -d "$proto_src_dir" ]; then
                     echo "🗑 Removing stale package directory: $pkg_dir"
                     sudo rm -rf "$pkg_dir"
