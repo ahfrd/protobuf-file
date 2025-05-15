@@ -54,7 +54,7 @@ jobs:
 
           if [ ! -d "$proto_src_dir" ]; then
                     echo "🗑 Removing stale package directory: $pkg_dir"
-                    rm -rf "$pkg_dir"
+                    sudo rm -rf "$pkg_dir"
                     continue
           fi
 
@@ -62,7 +62,7 @@ jobs:
                     base=$(basename "$gen_file" | cut -d. -f1)
                     if [ ! -f "$proto_src_dir/$base.proto" ]; then
                               echo "🗑 Removing stale generated file: $gen_file"
-                              rm -rf "$gen_file"
+                              sudo rm -rf "$gen_file"
                     fi
           done
         done
