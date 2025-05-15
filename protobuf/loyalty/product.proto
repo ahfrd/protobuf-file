@@ -9,7 +9,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/any.proto";
 
 
-service LoyaltyService{
+service ProductService{
     rpc GetListGiftsProduct(GetListGiftsProductRequest) returns (GetListGiftsResponse){}
     rpc GetListGiftsProductStruct(GetGiftsProductDetailRequest) returns (GetListGiftsStructResponse){}
     rpc GetListGiftsProductValue(GetGiftsProductDetailRequest) returns (GetListGiftsValueResponse){}
