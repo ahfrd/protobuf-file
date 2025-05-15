@@ -48,21 +48,33 @@ jobs:
 
         mkdir -p $OUT_ROOT
 
-        # Step 1: Cleanup stale files
-        for pkg_dir in "$OUT_ROOT"/*; do
+        for pkg_dir in generated/go/*; do
+          # Skip non-directories
           [ -d "$pkg_dir" ] || continue
 
-          proto_pkg=$(basename "$pkg_dir")
-          proto_src_dir="$PROTO_ROOT/$proto_pkg"
-          echo $proto_src_dir
-          echo "#######"
+          pkg=$(basename "$pkg_dir")
+          proto_src_dir="protobuf/$pkg"
+
+          # ✅ If proto directory doesn't exist anymore, remove the whole generated dir
           if [ ! -d "$proto_src_dir" ]; then
                     echo "🗑 Removing stale package directory: $pkg_dir"
                     sudo rm -rf "$pkg_dir"
                     continue
           fi
-        done
 
+          # Clean up stale .pb descriptor files
+          descriptor_dir="$pkg_dir/descriptor"
+          if [ -d "$descriptor_dir" ]; then
+                    for pb_file in "$descriptor_dir"/*.pb; do
+                              base=$(basename "$pb_file" .pb)
+                              if [ ! -f "$proto_src_dir/$base.proto" ]; then
+                                        echo "🗑 Removing stale descriptor file: $pb_file"
+                                        sudo chmod u+w "$pb_file" || true
+                                        sudo rm -f "$pb_file"
+                              fi
+                    done
+          fi
+        done
         dirs=$(find $PROTO_ROOT -type d -mindepth 1)
         if [ -z "$dirs" ]; then
           echo "⚠️ No proto subdirectories found in $PROTO_ROOT"
