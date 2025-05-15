@@ -55,13 +55,6 @@ jobs:
           pkg=$(basename "$pkg_dir")
           proto_src_dir="protobuf/$pkg"
 
-          # ✅ If proto directory doesn't exist anymore, remove the whole generated dir
-          if [ ! -d "$proto_src_dir" ]; then
-                    echo "🗑 Removing stale package directory: $pkg_dir"
-                    sudo rm -rf "$pkg_dir"
-                    continue
-          fi
-
           # Clean up stale .pb descriptor files
           descriptor_dir="$pkg_dir/descriptor"
           if [ -d "$descriptor_dir" ]; then
