@@ -45,13 +45,12 @@ jobs:
 
         mkdir -p $OUT_ROOT
 
-        # 1. Clean up orphaned descriptor directories
         for descriptor_dir in "$OUT_ROOT"/*/descriptor; do
           [ -d "$descriptor_dir" ] || continue
           pkg=$(basename "$(dirname "$descriptor_dir")")
           if [ ! -d "$PROTO_ROOT/$pkg" ]; then
-                echo "🧹 Removing descriptor for deleted package: $pkg"
-                rm -rf "$(dirname "$descriptor_dir")"
+                    echo "🧹 Removing generated files for deleted package: $pkg"
+                    rm -rf "$(dirname "$descriptor_dir")"
           fi
         done
 
@@ -63,15 +62,21 @@ jobs:
 
         for dir in $dirs; do
           pkg=$(basename "$dir")
-          descriptor=$OUT_ROOT/$pkg/descriptor
-          mkdir -p "$OUT_ROOT/$pkg"
-          mkdir -p "$descriptor"
+          out_dir=$OUT_ROOT/$pkg
+          descriptor_dir=$out_dir/descriptor
 
-          # Collect all proto files in the directory
+          mkdir -p "$out_dir"
+          mkdir -p "$descriptor_dir"
+
+          # Cleanup previously generated files in the package directory (but not manually written code)
+          echo "🧹 Cleaning old generated files in $out_dir"
+          find "$out_dir" -type f \( -name "*.pb.go" -o -name "*.pb.gw.go" -o -name "*.pb" \) -delete
+
+          # Find all proto files and generate together
           proto_files=$(find "$dir" -maxdepth 1 -name "*.proto")
           if [ -z "$proto_files" ]; then
-                echo "⚠️ No .proto files found in $dir, skipping..."
-                continue
+                    echo "⚠️ No .proto files found in $dir"
+                    continue
           fi
 
           protoc \
