@@ -58,13 +58,12 @@ jobs:
             if [ -d "$descriptor_dir" ]; then
               for pb_file in "$descriptor_dir"/*.pb; do
                 base=$(basename "$pb_file" .pb)
-                  if [ ! -f "$proto_src_dir/$base.proto" ]; then
-                    echo "🗑 Removing stale descriptor: $pb_file"
-                    rm -f "$pb_file"
-                  fi
-                done
-              fi
-            done
+                if [ ! -f "$proto_src_dir/$base.proto" ]; then
+                  echo "🗑 Removing stale descriptor: $pb_file"
+                  rm -f "$pb_file"
+                fi
+              done
+            fi
 
         dirs=$(find $PROTO_ROOT -type d -mindepth 1)
         if [ -z "$dirs" ]; then
